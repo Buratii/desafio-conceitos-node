@@ -1,33 +1,79 @@
-const express = require("express");
-const cors = require("cors");
+const express = require("express")
+const cors = require("cors")
 
-// const { uuid } = require("uuidv4");
+const { uuid, isUuid } = require("uuidv4")
 
-const app = express();
+const app = express()
 
-app.use(express.json());
-app.use(cors());
+app.use(express.json())
+app.use(cors())
 
-const repositories = [];
+const repositories = []
 
 app.get("/repositories", (request, response) => {
-  // TODO
-});
+  // const { title, techs } = request.query
+
+  // const results = title
+  //   ? repositories.filter((repository) => repository.title.includes(title))
+  //   : repositories
+
+  return response.json(repositories)
+})
 
 app.post("/repositories", (request, response) => {
-  // TODO
-});
+  const { url, title, techs } = request.body
+
+  const repository = { id: uuid(), url, title, techs, likes: 0 }
+
+  repositories.push(repository)
+
+  return response.status(200).json(repository)
+})
 
 app.put("/repositories/:id", (request, response) => {
-  // TODO
-});
+  const { id } = request.params
+  const { url, title, techs } = request.body
+
+  const verifyId = repositories.findIndex((repository) => repository.id === id)
+
+  if (verifyId < 0) {
+    return response.status(400).json({ error: "Repository not found" })
+  }
+
+  const update = { id, url, title, techs, likes: 0 }
+
+  repositories[verifyId] = update
+
+  return response.json(update)
+})
 
 app.delete("/repositories/:id", (request, response) => {
-  // TODO
-});
+  const { id } = request.params
+
+  const verifyId = repositories.findIndex((repository) => repository.id === id)
+
+  if (verifyId < 0) {
+    return response.status(400).json({ error: "Repository not found" })
+  }
+
+  repositories.splice(verifyId, 1)
+
+  return response.status(204).send()
+})
 
 app.post("/repositories/:id/like", (request, response) => {
-  // TODO
-});
+  const { id } = request.params
+  const { likes } = request.body
 
-module.exports = app;
+  const verifyId = repositories.findIndex((repository) => repository.id === id)
+
+  if (verifyId < 0) {
+    return response.status(400).json({ error: "Repository not found" })
+  }
+
+  repositories[verifyId].likes++
+
+  return response.status(200).json(repositories[verifyId])
+})
+
+module.exports = app
